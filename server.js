@@ -4,7 +4,7 @@ require("dotenv").config();
 
 require("./db.js");
 const config = require("./config");
-const PORT = process.env.PORT || config.get("serverPort");
+const PORT = process.env.PORT || 5050
 
 const app = require("./app.js");
 
