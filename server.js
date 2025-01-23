@@ -12,6 +12,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.options('*', cors());
+
 const PORT = process.env.PORT || 5050
 
 
