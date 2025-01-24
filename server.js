@@ -4,11 +4,6 @@ require("./db.js");
 const config = require("./config");
 const app = require("./app.js");
 
-
-
-
-
-
 const PORT = process.env.PORT || 5050
 
 
