@@ -20,7 +20,8 @@ const productSchema = new Schema({
 
 const citySchema = new Schema({
   city: String,
-  products: [productSchema]
+  products: [productSchema],
+  name: String,
 });
 
 module.exports = mongoose.model("City", citySchema);

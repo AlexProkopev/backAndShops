@@ -4,7 +4,8 @@ const getCities = (req, res, next) => {
   City.find()
     .then(cities => {
       const uniqueCities = [...new Map(cities.map(city => [city.city, city])).values()]
-        .map(city => ({ city: city.city, _id: city._id, name: city.name }));
+        .map(city => ({ city: city.city, _id: city._id, name: city.name}));
+        
       res.send(uniqueCities);
     })
     .catch(next);
