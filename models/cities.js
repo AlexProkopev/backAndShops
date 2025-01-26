@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const productSchema = new Schema({
   name: String,
-  image: String,
+  image: [String],
   variants: [
     {
       weight: Number,
