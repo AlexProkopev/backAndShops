@@ -1,15 +1,13 @@
-const getBasket = (req,res,next)=> {
-    res.send("get basket")
-  }
-  
-  const addToBasket = (req,res,next)=> {
-    // const { productId, quantity } = req.body;
-    res.send("add to basket")
-  }
+const getBasket = (req, res, next) => {
+  res.send("get basket");
+};
 
-  const deletedFromBasket = (req,res,next)=> {
-    // const productId = req.params.productId;
-    res.send(`delete from basket product `)
-  }
-    
-  module.exports = { getBasket, addToBasket, deletedFromBasket }
+const addToBasket = (req, res, next) => {
+  res.send("add to basket");
+};
+
+const deletedFromBasket = (req, res, next) => {
+  res.send(`delete from basket product `);
+};
+
+module.exports = { getBasket, addToBasket, deletedFromBasket };
