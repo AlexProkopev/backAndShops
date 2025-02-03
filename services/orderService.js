@@ -7,6 +7,13 @@ const createOrder = async (data) => {
   return await new Order({ ...data, expiresAt }).save();
 };
 
+// 🔹 Поиск заявки по ID
+const getOrderById = async (orderId) => {
+  const order = await Order.findById(orderId);
+  if (!order) return { error: "Заявка не найдена" };
+  return order;
+};
+
 // 🔹 Продление заявки (+10 минут, но не более 1 часа)
 const extendOrder = async (orderId) => {
   const order = await Order.findById(orderId);
@@ -39,4 +46,10 @@ const cleanExpiredOrders = async () => {
   await Order.deleteMany({ expiresAt: { $lt: new Date() } });
 };
 
-module.exports = { createOrder, extendOrder, getRemainingTime, cleanExpiredOrders };
+module.exports = {
+  createOrder,
+  getOrderById,
+  extendOrder,
+  getRemainingTime,
+  cleanExpiredOrders,
+};

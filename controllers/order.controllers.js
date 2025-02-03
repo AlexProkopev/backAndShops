@@ -19,6 +19,18 @@ const createOrder = async (req, res) => {
   }
 };
 
+// 🔹 Поиск заявки по ID
+const getOrderById = async (req, res) => {
+  try {
+    const order = await orderService.getOrderById(req.params.id);
+    order.error
+      ? res.status(404).json({ message: order.error })
+      : res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+  }
+};
+
 // 🔹 Продление заявки
 const extendOrder = async (req, res) => {
   try {
@@ -43,4 +55,4 @@ const getRemainingTime = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, extendOrder, getRemainingTime };
+module.exports = { createOrder, getOrderById, extendOrder, getRemainingTime };
