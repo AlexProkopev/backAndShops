@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt'); // Используй bcryptjs для кросс-платформенности
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+require('dotenv').config();
 
-const generateToken = (userId) => jwt.sign({ userId }, 'your_jwt_secret', { expiresIn: '1h' });
+const generateToken = (userId) => jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
 
 const registerUser = async (username, email, password) => {
   if (await User.findOne({ email })) throw new Error('Пользователь с таким email уже существует');
@@ -25,7 +27,6 @@ const loginUser = async (email, password) => {
 };
 
 const logoutUser = (res) => {
-    // Простой способ логаута: отдаем пустой ответ и сбрасываем Authorization header на фронте
     res.status(200).json({ message: 'Вы успешно вышли' });
   };
   

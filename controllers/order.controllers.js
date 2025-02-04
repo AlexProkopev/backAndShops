@@ -1,23 +1,37 @@
 const orderService = require("../services/orderService");
+const User = require("../models/user");
 
 // 🔹 Создание заявки
 const createOrder = async (req, res) => {
   const { productName, weight, district, paymentMethod, wallet } = req.body;
 
-  if (!req.body)
-    return res.status(400).json({ message: "Тело запроса пустое!" });
-
-  // Проверка обязательных полей
-  if (!productName || !weight || !district || !paymentMethod || !wallet)
+  if (!productName || !weight || !district || !paymentMethod || !wallet) 
     return res.status(400).json({ message: "Все поля обязательны" });
 
   try {
     const order = await orderService.createOrder(req.body);
+  
+    // ✅ Проверяем, есть ли пользователь (токен передан и декодирован)
+    if (req.user) {
+      console.log("🧐 req.user:", req.user);
+
+      console.log("🛠 ID пользователя из токена:", req.user?.userId);
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user.userId,  // Используем userId, а не _id
+        { $push: { orders: order._id },
+        $push: { orderHistory: order }, }, 
+        { new: true }  // 🔹 Вернем обновленный объект
+      )
+      console.log("📌 Обновленный пользователь:", updatedUser);
+    }
+    
     res.status(201).json(order);
   } catch (error) {
     res.status(500).json({ message: "Ошибка сервера", error: error.message });
   }
 };
+
+
 
 // 🔹 Поиск заявки по ID
 const getOrderById = async (req, res) => {

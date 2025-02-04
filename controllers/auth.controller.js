@@ -1,5 +1,5 @@
 const authService = require("../services/authService");
-
+const User = require('../models/user');
 // 🔹 Регистрация нового пользователя
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -49,7 +49,18 @@ const login = async (req, res) => {
   }
 };
 
+const getUserById = (req, res, next) => {
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .then((user) =>
+      user ? res.send(user) : res.status(404).send({ error: "user not found" })
+    )
+    .catch(next);
+};
+
 module.exports = {
   register,
   login,
+  getUserById
 };
