@@ -8,7 +8,9 @@ app.use(express.json());
 app.use("/api", cors(), routes);
 app.use(cors());
 app.options("*", cors());
-setInterval(cleanExpiredOrders, 60 * 1000);
+setInterval(() => {
+  cleanExpiredOrders();
+}, 60 * 1000);
 
 
 app.use((req, res) => {
