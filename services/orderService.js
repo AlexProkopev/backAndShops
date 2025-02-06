@@ -1,20 +1,50 @@
-const Order = require("../models/order.js");
+const User = require("../models/user");
+const Order = require("../models/order");
 
-// 🔹 Создание заявки (живет 30 минут)
 const createOrder = async (data) => {
-  console.log("📩 Данные, полученные для создания заявки:", data); 
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-  return await new Order({ ...data, expiresAt }).save();
+  const order = new Order({ ...data, expiresAt });
+
+  return await order.save();
 };
 
-// 🔹 Поиск заявки по ID
+const addOrderToUserHistory = async (orderId, userId, order) => {
+  try {
+    await User.findByIdAndUpdate(
+      userId,
+      { 
+        $push: { orders: orderId },
+        $push: { orderHistory: order }
+      },
+      { new: true }
+    );
+  } catch (error) {
+    throw new Error("Ошибка при обновлении истории пользователя: " + error.message);
+  }
+};
+
+const createOrderAndUpdateUser = async (orderData, userId) => {
+  try {
+    const order = await createOrder(orderData);
+
+    if (userId) {
+      await addOrderToUserHistory(order._id, userId);
+    }
+
+    return order;
+  } catch (error) {
+    throw new Error("Ошибка при создании заказа и обновлении пользователя: " + error.message);
+  }
+};
+
+
 const getOrderById = async (orderId) => {
   const order = await Order.findById(orderId);
   if (!order) return { error: "Заявка не найдена" };
   return order;
 };
 
-// 🔹 Продление заявки (+10 минут, но не более 1 часа)
+
 const extendOrder = async (orderId) => {
   const order = await Order.findById(orderId);
   if (!order) return { error: "Заявка не найдена" };
@@ -33,7 +63,7 @@ const extendOrder = async (orderId) => {
   return { success: "Заявка продлена", expiresAt: order.expiresAt };
 };
 
-// 🔹 Получение оставшегося времени
+
 const getRemainingTime = async (orderId) => {
   const order = await Order.findById(orderId);
   if (!order) return { error: "Заявка не найдена" };
@@ -41,15 +71,16 @@ const getRemainingTime = async (orderId) => {
   return { remainingTime: Math.max(0, order.expiresAt - new Date()) };
 };
 
-// 🔹 Удаление истекших заявок
 const cleanExpiredOrders = async () => {
   await Order.deleteMany({ expiresAt: { $lt: new Date() } });
 };
 
 module.exports = {
-  createOrder,
+  createOrderAndUpdateUser,
   getOrderById,
   extendOrder,
   getRemainingTime,
   cleanExpiredOrders,
+  addOrderToUserHistory,
+  createOrder
 };

@@ -1,19 +1,22 @@
 const authService = require("../services/authService");
-const User = require('../models/user');
-// 🔹 Регистрация нового пользователя
+
+// Регистрация пользователя
 const register = async (req, res) => {
   const { username, email, password } = req.body;
-
-  // Проверка на обязательные поля
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "Все поля обязательны" });
-  }
-
   try {
-    // Регистрация нового пользователя и генерация токена
-    const userWithToken = await authService.registerUser(username, email, password);
+    const userWithToken = await authService.registerUser(
+      username,
+      email,
+      password
+    );
 
-    // Возвращаем данные пользователя и токен
+    // Возвращаем токены в cookies
+    res.cookie("refreshToken", userWithToken.refreshToken, {
+      httpOnly: true, // Защищаем от доступа через JS
+      secure: process.env.NODE_ENV === "production", // Только для HTTPS на продакшне
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    });
+
     res.status(201).json({
       message: "Пользователь успешно зарегистрирован",
       user: {
@@ -21,46 +24,69 @@ const register = async (req, res) => {
         username: userWithToken.username,
         email: userWithToken.email,
       },
-      token: userWithToken.token, // Токен для автовхода
+      accessToken: userWithToken.accessToken,
     });
   } catch (error) {
-    // Ошибка с уже существующим пользователем
-    if (error.message.includes("email")) {
-      return res.status(409).json({ message: error.message });
-    }
     res.status(400).json({ message: error.message });
   }
 };
 
-// 🔹 Логин пользователя
+// Логин пользователя
 const login = async (req, res) => {
   const { email, password } = req.body;
+  try {
+    const { accessToken, refreshToken } = await authService.loginUser(
+      email,
+      password
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-  // Проверка на обязательные поля
-  if (!email || !password) {
-    return res.status(400).json({ message: "Все поля обязательны" });
+    res.json({ accessToken, refreshToken });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const currentUser = async (req, res) => {
+  const { userId } = req.user;
+  try {
+    const user = await authService.getCurrentUser(userId);
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const refresh = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token is required" });
   }
 
   try {
-    const token = await authService.loginUser(email, password);
-    res.json({ token });
+    const { accessToken, refreshToken: newRefreshToken } =
+      await authService.refreshAccessToken(refreshToken);
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ accessToken, refreshToken: newRefreshToken });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(401).json({ message: "Invalid or expired refresh token" });
   }
-};
-
-const getUserById = (req, res, next) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .then((user) =>
-      user ? res.send(user) : res.status(404).send({ error: "user not found" })
-    )
-    .catch(next);
 };
 
 module.exports = {
   register,
   login,
-  getUserById
+  currentUser,
+  refresh,
 };
