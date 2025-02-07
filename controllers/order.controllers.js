@@ -1,52 +1,35 @@
 const orderService = require("../services/orderService");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-
-const verifyToken = (token) => {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        reject("Неверный токен");
-      } else {
-        resolve(decoded);
-      }
-    });
-  });
-};
-
 const createOrder = async (req, res) => {
   const { productName, weight, district, paymentMethod, wallet } = req.body;
 
-  if (!productName || !weight || !district || !paymentMethod || !wallet)
+  if (!productName || !weight || !district || !paymentMethod || !wallet) {
     return res.status(400).json({ message: "Все поля обязательны" });
+  }
 
   try {
     const order = await orderService.createOrder(req.body);
 
     const token = req.headers["authorization"]?.split(" ")[1];
-    console.log("Токен из заголовков:", token);
 
     if (token) {
-      jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        if (err) {
-          console.error("Ошибка при проверке токена:", err);
-          return res.status(403).json({ message: "Неверный токен" });
-        }
-
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("Декодированный пользователь:", decoded);
 
         const userId = decoded.userId;
-
-        const updatedUser = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
           userId,
           {
-            $push: { orders: order._id },
-            $push: { orderHistory: order },
+            $push: { orders: order._id, orderHistory: order },
           },
           { new: true }
         );
-      });
-    } else {
+      } catch (err) {
+        console.error("Ошибка при проверке токена:", err);
+        // Если токен невалиден, просто продолжаем без привязки к пользователю
+      }
     }
 
     res.status(201).json(order);
