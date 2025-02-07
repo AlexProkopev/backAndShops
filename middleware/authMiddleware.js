@@ -1,20 +1,24 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
-const authenticate = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Нет токена" });
+    req.user = null; // Если токена нет, просто передаем дальше без пользователя
+    console.error("токена нет");
+    return next();
   }
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Неверный токен" });
-    }
-    console.log("Декодированный пользователь:", decoded);
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    next();
-  });
+    console.error(decoded);
+  } catch (err) {
+    console.error("Ошибка при проверке токена:", err);
+    req.user = null; // Если токен невалиден, продолжаем без него
+  }
+
+  next();
 };
 
-module.exports = authenticate;
+module.exports = authMiddleware;

@@ -1,6 +1,7 @@
 const orderService = require("../services/orderService");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+
 const createOrder = async (req, res) => {
   const { productName, weight, district, paymentMethod, wallet } = req.body;
 
@@ -11,25 +12,15 @@ const createOrder = async (req, res) => {
   try {
     const order = await orderService.createOrder(req.body);
 
-    const token = req.headers["authorization"]?.split(" ")[1];
-
-    if (token) {
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("Декодированный пользователь:", decoded);
-
-        const userId = decoded.userId;
-        await User.findByIdAndUpdate(
-          userId,
-          {
-            $push: { orders: order._id, orderHistory: order },
-          },
-          { new: true }
-        );
-      } catch (err) {
-        console.error("Ошибка при проверке токена:", err);
-        // Если токен невалиден, просто продолжаем без привязки к пользователю
-      }
+    if (req.user) {
+      // Если пользователь авторизован, привязываем заказ
+      await User.findByIdAndUpdate(
+        req.user.userId,
+        {
+          $push: { orders: order._id, orderHistory: order },
+        },
+        { new: true }
+      );
     }
 
     res.status(201).json(order);
