@@ -13,7 +13,6 @@ const createOrder = async (req, res) => {
     const order = await orderService.createOrder(req.body);
 
     if (req.user) {
-      // Если пользователь авторизован, привязываем заказ
       await User.findByIdAndUpdate(
         req.user.userId,
         {

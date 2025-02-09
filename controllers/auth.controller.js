@@ -1,6 +1,5 @@
 const authService = require("../services/authService");
 
-// Регистрация пользователя
 const register = async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -10,11 +9,11 @@ const register = async (req, res) => {
       password
     );
 
-    // Возвращаем токены в cookies
+
     res.cookie("refreshToken", userWithToken.refreshToken, {
-      httpOnly: true, // Защищаем от доступа через JS
-      secure: process.env.NODE_ENV === "production", // Только для HTTPS на продакшне
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -31,7 +30,7 @@ const register = async (req, res) => {
   }
 };
 
-// Логин пользователя
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {

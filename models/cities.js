@@ -6,6 +6,7 @@ const citySchema = new Schema({
   city: String,
   products: [productSchema],
   name: String,
+  img: String,
 });
 
 module.exports = mongoose.model("City", citySchema);
