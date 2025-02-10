@@ -43,10 +43,21 @@ const loginUser = async (email, password) => {
   const user = await User.findOne({ email });
   if (!user || !(await bcrypt.compare(password, user.password)))
     throw new Error("Неверный email или пароль");
+
   const { accessToken, refreshToken } = generateTokens(user._id);
   user.refreshToken = refreshToken;
   await user.save();
-  return { accessToken, refreshToken };
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      orderHistory: user.orderHistory || [],
+    },
+  };
 };
 
 const refreshAccessToken = async (refreshToken) => {

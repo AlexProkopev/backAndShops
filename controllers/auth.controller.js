@@ -34,17 +34,18 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const { accessToken, refreshToken } = await authService.loginUser(
+    const { accessToken, refreshToken, user } = await authService.loginUser(
       email,
       password
     );
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken, refreshToken });
+    res.json({ accessToken, refreshToken, user }); 
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
