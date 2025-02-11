@@ -44,7 +44,6 @@ const getOrderById = async (orderId) => {
   return order;
 };
 
-
 const extendOrder = async (orderId) => {
   const order = await Order.findById(orderId);
   if (!order) return { error: "Заявка не найдена" };
@@ -56,7 +55,8 @@ const extendOrder = async (orderId) => {
   if (now - order.lastExtendAt < 30 * 1000) return { error: "Продлевать можно раз в 30 секунд" };
   if (order.expiresAt >= maxExtendTime) return { error: "Заявка не может быть продлена более 1 часа" };
 
-  order.expiresAt = new Date(order.expiresAt.getTime() + 10 * 60 * 1000);
+
+  order.expiresAt = new Date(order.expiresAt.getTime() + 30 * 60 * 1000);
   order.lastExtendAt = now;
   await order.save();
 
@@ -75,6 +75,15 @@ const cleanExpiredOrders = async () => {
   await Order.deleteMany({ expiresAt: { $lt: new Date() } });
 };
 
+
+const deleteOrder = async (orderId) => {
+  const order = await Order.findById(orderId);
+  if (!order) return { error: "Заявка не найдена" };
+
+  await Order.findByIdAndDelete(orderId);
+  return { success: true };
+};
+
 module.exports = {
   createOrderAndUpdateUser,
   getOrderById,
@@ -82,5 +91,6 @@ module.exports = {
   getRemainingTime,
   cleanExpiredOrders,
   addOrderToUserHistory,
-  createOrder
+  createOrder,
+  deleteOrder
 };

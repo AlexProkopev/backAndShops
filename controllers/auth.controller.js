@@ -84,9 +84,20 @@ const refresh = async (req, res) => {
   }
 };
 
+const logOut = async (req, res) => {
+  try {
+    // Просто отправляем успешный ответ
+    res.json({ message: "Вы успешно вышли из системы" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   register,
   login,
   currentUser,
   refresh,
+  logOut
 };

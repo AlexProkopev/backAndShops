@@ -62,4 +62,16 @@ const getRemainingTime = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, getOrderById, extendOrder, getRemainingTime };
+const deleteOrder = async (req, res) => {
+  try {
+    const result = await orderService.deleteOrder(req.params.idOrder);
+
+    result.error
+      ? res.status(404).json({ message: result.error })
+      : res.json({ message: "Заявка успешно удалена" });
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+  }
+};
+
+module.exports = { createOrder, getOrderById, extendOrder, getRemainingTime, deleteOrder };
