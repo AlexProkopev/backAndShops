@@ -6,6 +6,7 @@ const orderSchema = new mongoose.Schema({
   district: { type: String, required: true },
   paymentMethod: { type: String, required: true },
   wallet: { type: String, required: true },
+  price: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now },
   expiresAt: { type: Date, required: true },
   lastExtendAt: { type: Date, default: Date.now }
