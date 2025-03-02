@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const { cleanExpiredOrders } = require("./services/orderService");
 
+
 app.use(express.json());
 app.use("/api", cors(), routes);
 app.use(cors());
@@ -23,5 +24,7 @@ app.use((err, req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   next();
 });
+
+
 
 module.exports = app;
