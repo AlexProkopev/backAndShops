@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
       },
     ],
     orderHistory: [Object],
+    discount: {
+      type: Number,
+      default: 10,
+    },
   },
   { timestamps: true }
 );
