@@ -34,6 +34,8 @@ const registerUser = async (username, email, password) => {
     id: newUser._id,
     username: newUser.username,
     email: newUser.email,
+    orderHistory: user.orders || [],
+      discount: user.discount || [],
     accessToken,
     refreshToken,
   };
@@ -55,7 +57,8 @@ const loginUser = async (email, password) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      orderHistory: user.orderHistory || [],
+      orderHistory: user.orders || [],
+      discount: user.discount || []
     },
   };
 };
