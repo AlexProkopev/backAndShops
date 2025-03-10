@@ -16,7 +16,6 @@ const generateTokens = (userId) => {
 
 const registerUser = async (username, email, password) => {
   if (await User.findOne({ email }))
-
     throw new Error("Пользователь с таким email уже существует");
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,8 +33,9 @@ const registerUser = async (username, email, password) => {
     id: newUser._id,
     username: newUser.username,
     email: newUser.email,
-    orderHistory: user.orders || [],
-      discount: user.discount || [],
+    orderHistory: newUser.orders || [],
+    discount: newUser.discount || [],
+    balance: newUser.balance || 0,
     accessToken,
     refreshToken,
   };
@@ -58,7 +58,8 @@ const loginUser = async (email, password) => {
       username: user.username,
       email: user.email,
       orderHistory: user.orders || [],
-      discount: user.discount || []
+      discount: user.discount || [],
+      balance: user.balance || 0,
     },
   };
 };
@@ -93,11 +94,9 @@ const getCurrentUser = async (userId) => {
   }
 };
 
-
 module.exports = {
   registerUser,
   loginUser,
   refreshAccessToken,
   getCurrentUser,
-  
 };
