@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
     orderHistory: [Object],
     discount: {
       type: Number,
-      default: 10,
+      default: 0,
     },
     balance: {
       type: Number,
